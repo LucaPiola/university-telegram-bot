@@ -28,6 +28,7 @@ url_login_end = "https://sol.liuc.it/e3rest/api/login/"
 url_average = 'http://sol.liuc.it/e3rest/api/libretto-service-v2/libretti/'
 #example: ".../e3rest/api/libretto-service-v2/libretti/999/medie" return average of student with matId 999
 url_libretto = 'http://sol.liuc.it/e3rest/api/libretto-service-v2/libretti/'
+url_tasse = 'http://sol.liuc.it/e3rest/api/tasse-service-v1/lista-fatture?persId='
 
 #start requests session
 session = requests.session()
@@ -44,11 +45,13 @@ def login(username1, pwd):
     matricola = (user_details_json["user"]["trattiCarriera"][0]["matricola"])
     name = (user_details_json["user"]["firstName"])
     surname = (user_details_json["user"]["lastName"])
+    personaId = (user_details_json["user"]["persId"])
     user_details.append(matId)
     user_details.append(stuId)
     user_details.append(matricola)
     user_details.append(name)
     user_details.append(surname)
+    user_details.append(personaId)
     return user_details
 
 
@@ -125,6 +128,22 @@ def get_libretto(username1, pwd):
 
     return libretto, esami_dati_da_dare
     
+
+def get_tasse(username1, pwd):
+    persId = login(username1, pwd)[5]
+    personal_url_tax = url_tasse + str(persId)
+    response = session.get(personal_url_tax, auth = (username1, pwd))
+    tax_json = json.loads(response.text)
+    tasse_da_pagare = []
+    tasse_pagate = []
+    for i in range(len(tax_json)):
+        if tax_json[i]["importoPag"] != None:
+            tasse_pagate.append(tax_json[i]["importoPag"])
+        else:
+            tasse_da_pagare.append([tax_json[i]["importoFattura"],tax_json[i]["scadFattura"],tax_json[i]["fattId"]])
+    
+    return tasse_da_pagare, tasse_pagate
+
 #----------------------------------------------------------------------------------------------------------------
 
 def liucLogin(username1, pwd):

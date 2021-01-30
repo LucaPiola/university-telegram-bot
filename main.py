@@ -96,7 +96,7 @@ def insert_password(update: Update, context: CallbackContext) -> int:
  
     welcome_message = "Ciao " + name + " " + ", scegli un'opzione: "
     #print on telegram possible choices 
-    reply_keyboard = [['Esiti', 'Libretto', 'Appelli', 'Media', 'Chiudi']]
+    reply_keyboard = [['Esiti', 'Libretto', 'Appelli', 'Media', 'Tasse', 'Chiudi']]
     update.message.reply_text(
     welcome_message,
     reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True),
@@ -113,6 +113,7 @@ def activities(update: Update, context: CallbackContext) -> int:
     
     url = "https://sol.liuc.it/e3rest/api/"
     
+
     choice = update.message.text
     
 
@@ -174,15 +175,35 @@ def activities(update: Update, context: CallbackContext) -> int:
             #da fixare, problema in liucAPI, probabilmente se logga due volte va a cazzo
             update.message.reply_text("Impossibile trovare media, riprova. ")
 
+
+    #print uni taxes
+    if choice == 'Tasse':
+        tasse_info = LIUC.get_tasse(username1, password)
+        pagato = sum(tasse_info[1])
+        da_pagare = tasse_info[0]
+        tasse_message = ""
+        tasse_link = ""
+        url_stampa_tasse = 'sol.liuc.it/esse3/auth/studente/Tasse/StampaMav.do?fatt_id='
+
+        if len(da_pagare) == 0:
+            tasse_message = "Non hai tasse da pagare! \nHai pagato: *€" + pagato + "*in tutto. "     
+        else:
+            for i in range(len(da_pagare)):
+                tasse_message = tasse_message +  str(i+1) + ") *€" + str(da_pagare[i][0]) + "* entro il *" + str(da_pagare[i][1] +"*\n")
+                tasse_link = "Link tassa: " + str(url_stampa_tasse) + "" + str(da_pagare[i][2]) +  "\n"
+
+        update.message.reply_text(tasse_message, parse_mode='Markdown')  
+        update.message.reply_text(tasse_link)  
+
     #stop the conversation
     if choice == 'Chiudi':
         update.message.reply_text("Logout effettuato! Scrivi /start per ricominciare!")
         return ConversationHandler.END
 
 
-    reply_keyboard = [['Esiti', 'Libretto', 'Appelli', 'Media', 'Chiudi']]
+    reply_keyboard = [['Esiti', 'Libretto', 'Appelli', 'Media', 'Tasse', 'Chiudi']]
     update.message.reply_text(
-    "Cosa vuoi fare? ",
+    "    Scegli un'opzione    ",
     reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True),
     )
     return ACTIVITIES
@@ -205,7 +226,7 @@ def main() -> None:
             INSERT_USER: [MessageHandler(Filters.text, insert_user, pass_user_data=True)],
             INSERT_PASSWORD: [
                 MessageHandler(Filters.text, insert_password, pass_user_data=True)],
-            ACTIVITIES: [MessageHandler(Filters.regex('^(Esiti|Libretto|Appelli|Media|Chiudi)$'), activities)],
+            ACTIVITIES: [MessageHandler(Filters.regex('^(Esiti|Libretto|Appelli|Media|Tasse|Chiudi)$'), activities)],
         },
         fallbacks=[CommandHandler('cancel', activities)],
          allow_reentry = True,
