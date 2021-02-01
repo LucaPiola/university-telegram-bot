@@ -29,7 +29,7 @@ url_average = 'http://sol.liuc.it/e3rest/api/libretto-service-v2/libretti/'
 #example: ".../e3rest/api/libretto-service-v2/libretti/999/medie" return average of student with matId 999
 url_libretto = 'http://sol.liuc.it/e3rest/api/libretto-service-v2/libretti/'
 url_tasse = 'http://sol.liuc.it/e3rest/api/tasse-service-v1/lista-fatture?persId='
-
+url_stampa_tasse = 'https://sol.liuc.it/esse3/auth/studente/Tasse/StampaMav.do?fatt_id='
 #start requests session
 session = requests.session()
 session.get(url_login)
@@ -163,6 +163,7 @@ def liucLogin(username1, pwd):
             print("Login non riuscito. ")
     except:
         print("Login non riuscito ")
+    
 
 
 
@@ -189,3 +190,13 @@ def get_last_mark(username1, pwd):
         esiti.append(info_esito)
   
     return esiti
+
+#get PDF with taxes payment details
+def get_mav_pdf(username1, pwd, tax_id):
+    liucLogin(username1, pwd)
+    url_stampa_tasse = 'https://sol.liuc.it/esse3/auth/studente/Tasse/StampaMav.do?fatt_id=' + str(tax_id)
+    response = session.get(url_stampa_tasse, auth=(username1,pwd))
+    pdf_path = '/tmp/' + username1.replace("." , "") + ".pdf"
+    with open(pdf_path, 'wb') as f:
+        f.write(response.content)
+

@@ -193,8 +193,13 @@ def activities(update: Update, context: CallbackContext) -> int:
                 tasse_link = "Link tassa: " + str(url_stampa_tasse) + "" + str(da_pagare[i][2]) +  "\n"
 
         update.message.reply_text(tasse_message, parse_mode='Markdown')  
-        update.message.reply_text(tasse_link)  
+        #uncomment this to send link to pdf with payment details
+        #update.message.reply_text(tasse_link)  
+        LIUC.get_mav_pdf(username1, password, da_pagare[0][2])
+        pdf_path = '/tmp/' + username1.replace("." , "") + ".pdf"
+        update.message.reply_document(document=open(pdf_path, 'rb'))
 
+    
     #stop the conversation
     if choice == 'Chiudi':
         update.message.reply_text("Logout effettuato! Scrivi /start per ricominciare!")
