@@ -219,7 +219,7 @@ def activities(update: Update, context: CallbackContext) -> int:
 #main bot function to handle the conversation
 def main() -> None:
     
-    updater = Updater("1492190157:AAHJKgrfxnxFKodOWleARo3hte3DBvuHYyA", use_context=True)
+    updater = Updater("putyoutokenhere", use_context=True)
     dispatcher = updater.dispatcher
 
 
